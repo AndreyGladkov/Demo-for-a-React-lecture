@@ -5,9 +5,19 @@ import { VacancyCard } from '../SearchVacancy/VacancyCard';
 
 const VISIBLE_VACANCIES = 3;
 
+const counterText = ({ data, isLoading, isError }: { data?: unknown[]; isLoading: boolean; isError: boolean }) => {
+    if (isLoading) {
+        return 'Загружаем…';
+    }
+    if (isError) {
+        return 'Не удалось загрузить вакансии';
+    }
+    return `Найдено вакансий: ${data?.length ?? 0}`;
+};
+
 const VacancyCounter = () => {
-    const { data, isLoading } = useGetVacanciesQuery({ text: 'frontend' });
-    return <p className="rtk-demo__counter">{isLoading ? 'Загружаем…' : `Найдено вакансий: ${data?.length ?? 0}`}</p>;
+    const query = useGetVacanciesQuery({ text: 'frontend' });
+    return <p className="rtk-demo__counter">{counterText(query)}</p>;
 };
 
 const VacancyList = () => {

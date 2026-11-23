@@ -43,3 +43,12 @@ test('showing the block again takes data from the cache', async () => {
     expect(screen.getByText(`Найдено вакансий: ${expectedTotal}`)).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
 });
+
+test('counter reports a failed request instead of zero vacancies', async () => {
+    fetchMock.mockResolvedValueOnce(new Response('Not Found', { status: 404 }));
+    renderWithStore(<RtkQueryDemo />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Показать вакансии' }));
+
+    expect(await screen.findByText('Не удалось загрузить вакансии')).toBeInTheDocument();
+});
