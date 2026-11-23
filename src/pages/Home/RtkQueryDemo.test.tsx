@@ -21,24 +21,47 @@ afterEach(() => {
 
 const expectedTotal = searchVacancies('hh.ru', 'frontend').length;
 
-test('counter and list share one request', async () => {
+const toggle = (name: string) => userEvent.click(screen.getByRole('button', { name }));
+
+test('counter loads vacancies without the list', async () => {
+    renderWithStore(<RtkQueryDemo />);
+
+    await toggle('Показать счётчик');
+
+    expect(screen.getByText('Загружаем…')).toBeInTheDocument();
+    expect(await screen.findByText(`Найдено вакансий: ${expectedTotal}`)).toBeInTheDocument();
+    expect(screen.queryAllByRole('article')).toHaveLength(0);
+});
+
+test('list added next to the counter takes data from the same request', async () => {
     const { store } = renderWithStore(<RtkQueryDemo />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Показать вакансии' }));
+    await toggle('Показать счётчик');
+    await screen.findByText(`Найдено вакансий: ${expectedTotal}`);
+    await toggle('Показать список');
 
-    expect(await screen.findByText(`Найдено вакансий: ${expectedTotal}`)).toBeInTheDocument();
     expect(screen.getAllByRole('article')).toHaveLength(3);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(store.getState().demo.bffRequests).toBe(1);
 });
 
-test('showing the block again takes data from the cache', async () => {
+test('counter and list shown together share one request', async () => {
     renderWithStore(<RtkQueryDemo />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Показать вакансии' }));
+    await toggle('Показать список');
+    await toggle('Показать счётчик');
+
+    expect(await screen.findByText(`Найдено вакансий: ${expectedTotal}`)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+});
+
+test('showing the counter again takes data from the cache', async () => {
+    renderWithStore(<RtkQueryDemo />);
+
+    await toggle('Показать счётчик');
     await screen.findByText(`Найдено вакансий: ${expectedTotal}`);
-    await userEvent.click(screen.getByRole('button', { name: 'Скрыть вакансии' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Показать вакансии' }));
+    await toggle('Скрыть счётчик');
+    await toggle('Показать счётчик');
 
     expect(screen.getByText(`Найдено вакансий: ${expectedTotal}`)).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -48,7 +71,7 @@ test('counter reports a failed request instead of zero vacancies', async () => {
     fetchMock.mockResolvedValueOnce(new Response('Not Found', { status: 404 }));
     renderWithStore(<RtkQueryDemo />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Показать вакансии' }));
+    await toggle('Показать счётчик');
 
     expect(await screen.findByText('Не удалось загрузить вакансии')).toBeInTheDocument();
 });

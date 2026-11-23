@@ -157,6 +157,11 @@ a,
     color: var(--muted);
 }
 
+.rtk-demo__controls {
+    display: flex;
+    gap: 8px;
+}
+
 .rtk-demo__counter {
     font-weight: 600;
 }

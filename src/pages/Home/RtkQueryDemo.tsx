@@ -32,24 +32,26 @@ const VacancyList = () => {
 };
 
 export const RtkQueryDemo = () => {
-    const [isShown, setIsShown] = useState(false);
+    const [isCounterShown, setIsCounterShown] = useState(false);
+    const [isListShown, setIsListShown] = useState(false);
 
     return (
         <section className="rtk-demo">
             <h2>RTK Query: два компонента, один запрос</h2>
             <p className="rtk-demo__hint">
-                Network: один запрос vacancies на счётчик и список. Скройте и покажите снова в течение минуты — данные
-                придут из кеша без запроса.
+                Счётчик грузит данные сам и работает без списка. Список рядом не делает второго запроса. Скройте и
+                покажите снова в течение минуты — данные придут из кеша.
             </p>
-            <button onClick={() => setIsShown((shown) => !shown)}>
-                {isShown ? 'Скрыть вакансии' : 'Показать вакансии'}
-            </button>
-            {isShown && (
-                <>
-                    <VacancyCounter />
-                    <VacancyList />
-                </>
-            )}
+            <div className="rtk-demo__controls">
+                <button onClick={() => setIsCounterShown((shown) => !shown)}>
+                    {isCounterShown ? 'Скрыть счётчик' : 'Показать счётчик'}
+                </button>
+                <button onClick={() => setIsListShown((shown) => !shown)}>
+                    {isListShown ? 'Скрыть список' : 'Показать список'}
+                </button>
+            </div>
+            {isCounterShown && <VacancyCounter />}
+            {isListShown && <VacancyList />}
         </section>
     );
 };
